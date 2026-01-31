@@ -3,9 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
+    <title>Щоденник — Inforjeys</title>
+    <style>
+    :root{--accent:#6c63ff;--bg:#fff;--muted:#6b7280}
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;line-height:1.4;margin:0;color:#111;background:#f7f7fb}
+    .container{max-width:1100px;margin:0 auto;padding:0 1rem}
+    .site-header{background:linear-gradient(90deg,#fff,#f8f8ff);border-bottom:1px solid #e6e9ef;position:sticky;top:0;z-index:100}
+    .site-header .container{display:flex;align-items:center;gap:1rem;padding:0.5rem 1rem}
+    .logo{font-weight:700;color:var(--accent);text-decoration:none;font-size:1.1rem}
+    .logo .tagline{font-weight:400;color:var(--muted);font-size:0.9rem;margin-left:0.5rem}
+    .main-nav ul{list-style:none;margin:0;padding:0;display:flex;gap:0.5rem;align-items:center}
+    .main-nav a{display:inline-block;padding:0.5rem 0.75rem;color:#111;text-decoration:none;border-radius:6px}
+    .main-nav a:hover{background:#eef}
+    .btn.new-entry{background:var(--accent);color:#fff}
+    .nav-toggle{display:none;background:transparent;border:0;font-size:1.2rem}
+    .site-main{padding:2rem 1rem}
+    .today{color:var(--muted);margin-top:0.25rem}
+
+    /* Responsive */
+    @media(max-width:700px){
+      .nav-toggle{display:inline-block;margin-left:auto}
+      .main-nav{position:absolute;top:56px;left:0;right:0;background:#fff;padding:1rem;border-top:1px solid #eee;box-shadow:0 10px 30px rgba(0,0,0,0.05);transform-origin:top;display:none}
+      .main-nav.open{display:block}
+      .main-nav ul{flex-direction:column;gap:0.25rem}
+    }
+    </style>
+</head>"
 <body>
-    
-</body>
+    <header class="site-header">
+      <div class="container">
+        <a href="#" class="logo">Inforjeys <span class="tagline">Щоденник</span></a>
+        <button class="nav-toggle" aria-expanded="false" aria-label="Відкрити меню">☰</button>
+        <nav class="main-nav" id="main-nav">
+          <ul>
+            <li><a href="#">Головна</a></li>
+            <li><a href="#">Записи</a></li>
+            <li><a href="#" class="btn new-entry">Нова запис</a></li>
+            <li><a href="#">Про сайт</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main class="site-main container">
+      <h1>Ласкаво просимо до вашого щоденника</h1>
+      <p class="today">Сьогодні: <span id="today"></span></p>
+      <!-- Тут будуть записи -->
+    </main>
+
+    <script>
+      // Встановлює дату та перемикає мобільне меню
+      document.getElementById('today').textContent = new Date().toLocaleDateString('uk-UA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      const toggle = document.querySelector('.nav-toggle');
+      const nav = document.getElementById('main-nav');
+      toggle.addEventListener('click', () => {
+        const expanded = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', String(!expanded));
+        nav.classList.toggle('open');
+      });
+    </script>
+  </body>
 </html>
