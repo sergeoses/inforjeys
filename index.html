@@ -71,8 +71,10 @@
     .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,0.45);padding:1rem;opacity:0;pointer-events:none;transition:opacity 200ms ease}
     .modal.open{opacity:1;pointer-events:auto}
     .modal-card{background:var(--card);width:100%;max-width:720px;border-radius:10px;padding:1rem;border:1px solid rgba(0,0,0,0.06);transform:translateY(-12px);transition:transform 200ms ease}
+    .modal-card.small{max-width:420px;padding:0.9rem}
     .modal.open .modal-card{transform:translateY(0)}
     .modal-close{position:absolute;right:12px;top:12px;background:transparent;border:0;padding:6px;border-radius:6px;cursor:pointer}
+    .btn.danger{background:#d9534f;color:#fff;border-color:#d9534f} 
 
     /* Toasts */
     #toast-container{position:fixed;right:16px;bottom:20px;z-index:150;display:flex;flex-direction:column;gap:0.5rem}
@@ -85,7 +87,7 @@
 
     @media(max-width:540px){ .btn{padding:0.45rem 0.6rem} .site-title{font-size:1.05rem} }
     </style>
-</head>"
+</head>
 <body>
     <div class="admin-bar">
       <div class="container">
@@ -116,9 +118,6 @@
           <button class="btn theme-toggle" id="theme-toggle" aria-label="Змінити тему">🌙</button>
           <button class="btn primary new-entry" id="open-new">Нова запис</button>
           <div class="profile">
-            <button class="profile-btn" id="profile-btn" aria-haspopup="true" aria-expanded="false">
-              <span class="avatar" id="avatar">U</span>
-            </button>
             <div class="profile-menu" id="profile-menu" role="menu">
               <div style="padding:0.5rem 0.5rem; border-bottom:1px solid rgba(0,0,0,0.04);">
                 <strong id="profile-name">Гість</strong>
@@ -178,8 +177,14 @@
           </div>
 
           <div class="widget">
-            <h4>Поради</h4>
-            <div class="small">Це перша версія. Ви можете експортувати/імпортувати записи або синхронізувати з віддаленим сховищем (mock).</div>
+            <h4>Статистика</h4>
+            <div class="small">Всього записів: <strong id="total-count">0</strong></div>
+            <div class="small">Улюблених: <strong id="favorites-count">0</strong></div>
+            <div class="small">Остання синхронізація: <strong id="last-sync">—</strong></div>
+            <div style="margin-top:0.5rem">
+              <button class="btn ghost" id="refresh-stats">Оновити</button>
+              <button class="btn ghost" id="clear-all">Очистити всі</button>
+            </div>
           </div>
         </aside>
       </div>
@@ -210,6 +215,19 @@
             <button type="submit" class="btn primary" id="save">Зберегти</button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div class="modal" id="confirm-modal" aria-hidden="true">
+      <div class="modal-card small" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+        <button class="modal-close" id="confirm-close" aria-label="Закрити">✕</button>
+        <h3 id="confirm-title" style="margin-top:0">Підтвердіть дію</h3>
+        <p id="confirm-message" class="small" style="margin:0.5rem 0 1rem 0"></p>
+        <div class="modal-actions" style="display:flex;justify-content:flex-end;gap:0.5rem">
+          <button type="button" class="btn ghost" id="confirm-cancel">Відмінити</button>
+          <button type="button" class="btn danger" id="confirm-ok">Підтвердити</button>
+        </div>
       </div>
     </div>
 
@@ -250,19 +268,29 @@
       const USER_KEY = 'diary.user';
       function renderUser(){
         const user = JSON.parse(localStorage.getItem(USER_KEY));
+        const authInd = document.getElementById('auth-indicator');
         if(user){
           profileName.textContent = user.name;
           avatarEl.textContent = (user.name || 'U').slice(0,1).toUpperCase();
           signInBtn.style.display = 'none';
           signOutBtn.style.display = 'block';
+          if(authInd){ authInd.textContent = 'K'; authInd.title = 'Увійшли як користувач (натисни щоб вийти)'; }
         } else {
           profileName.textContent = 'Гість';
           avatarEl.textContent = 'G';
           signInBtn.style.display = 'block';
           signOutBtn.style.display = 'none';
+          if(authInd){ authInd.textContent = 'G'; authInd.title = 'Ви як гість (натисни щоб увійти)'; }
         }
       }
-      profileBtn.addEventListener('click', ()=>{
+      // auth indicator click
+      document.getElementById('auth-indicator') && document.getElementById('auth-indicator').addEventListener('click', ()=>{
+        const user = JSON.parse(localStorage.getItem(USER_KEY));
+        if(user) {
+          confirmModal('Вийти з профілю?').then(ok => { if(ok) signOutBtn.click(); });
+        } else signInBtn.click();
+      });
+      profileBtn && profileBtn.addEventListener('click', ()=>{
         const open = profileMenu.classList.toggle('open');
         profileBtn.setAttribute('aria-expanded', String(open));
       });
@@ -292,6 +320,30 @@
       }
 
       // ---- Записи ----
+      // Confirm modal (replaces native confirm with styled modal)
+      const confirmModalEl = document.getElementById('confirm-modal');
+      const confirmMessageEl = confirmModalEl ? confirmModalEl.querySelector('#confirm-message') : null;
+      const confirmOkBtn = confirmModalEl ? confirmModalEl.querySelector('#confirm-ok') : null;
+      const confirmCancelBtn = confirmModalEl ? confirmModalEl.querySelector('#confirm-cancel') : null;
+      const confirmCloseBtn = confirmModalEl ? confirmModalEl.querySelector('#confirm-close') : null;
+      function confirmModal(message, opts = {}) {
+        return new Promise(resolve=>{
+          if(!confirmModalEl){ resolve(window.confirm(message)); return; }
+          confirmMessageEl.textContent = message;
+          confirmOkBtn.textContent = opts.confirmText || 'Підтвердити';
+          confirmCancelBtn.textContent = opts.cancelText || 'Відмінити';
+          confirmOkBtn.classList.toggle('danger', !!opts.danger);
+          confirmModalEl.classList.add('open');
+          function cleanup(){ confirmModalEl.classList.remove('open'); confirmOkBtn.removeEventListener('click', onOk); confirmCancelBtn.removeEventListener('click', onCancel); confirmCloseBtn && confirmCloseBtn.removeEventListener('click', onCancel); document.removeEventListener('keydown', onKey); }
+          function onOk(){ cleanup(); resolve(true); }
+          function onCancel(){ cleanup(); resolve(false); }
+          function onKey(e){ if(e.key==='Escape') onCancel(); if(e.key==='Enter') onOk(); }
+          confirmOkBtn.addEventListener('click', onOk);
+          confirmCancelBtn.addEventListener('click', onCancel);
+          confirmCloseBtn && confirmCloseBtn.addEventListener('click', onCancel);
+          document.addEventListener('keydown', onKey);
+        });
+      }
       const ENTRIES_KEY = 'diary.entries';
       const entriesGrid = document.getElementById('entries-grid');
       const emptyState = document.getElementById('empty-state');
@@ -348,6 +400,7 @@
       }
       function saveEntries(list){
         localStorage.setItem(ENTRIES_KEY, JSON.stringify(list));
+        try{ updateStats(); }catch(e){/* ignore until updateStats defined */}
       }
 
       function formatDate(iso){
@@ -475,13 +528,14 @@
           const list = loadEntries();
           openModal(list.find(x=>x.id===id));
         } else if(action === 'delete'){
-          if(confirm('Ви впевнені, що хочете видалити запис?')){
+          confirmModal('Ви впевнені, що хочете видалити запис?').then(ok=>{
+            if(!ok) return;
             const list = loadEntries().filter(x=>x.id!==id);
             saveEntries(list);
             renderEntries(searchInput.value);
             showToast('Запис видалено','success');
-          }
-        } else if(action === 'favorite'){
+          });
+        } else if(action === 'favorite'){ 
           const list = loadEntries();
           const idx = list.findIndex(x=>x.id===id);
           if(idx > -1){
@@ -518,14 +572,16 @@
           try{
             const imported = JSON.parse(ev.target.result);
             if(!Array.isArray(imported)) throw new Error('JSON має бути масивом записів');
-            if(confirm('Замінити на імпортовані записи? OK = ЗАМІНИТИ; Cancel = ДОДАТИ')){
-              const normalized = imported.map(it=> ({...it, id: it.id || 'imp-'+Math.random().toString(36).slice(2,9)}));
-              saveEntries(normalized);
-            } else {
-              const current = loadEntries(); const ids = new Set(current.map(x=>x.id));
-              for(const it of imported){ let id = it.id || 'imp-'+Math.random().toString(36).slice(2,9); if(ids.has(id)) id = 'imp-'+Math.random().toString(36).slice(2,9); ids.add(id); current.push({...it, id}); }
-              saveEntries(current);
-            }
+            confirmModal('Замінити на імпортовані записи? OK = ЗАМІНИТИ; Cancel = ДОДАТИ', {confirmText:'ЗАМІНИТИ', cancelText:'ДОДАТИ'}).then(ok=>{
+              if(ok){
+                const normalized = imported.map(it=> ({...it, id: it.id || 'imp-'+Math.random().toString(36).slice(2,9)}));
+                saveEntries(normalized);
+              } else {
+                const current = loadEntries(); const ids = new Set(current.map(x=>x.id));
+                for(const it of imported){ let id = it.id || 'imp-'+Math.random().toString(36).slice(2,9); if(ids.has(id)) id = 'imp-'+Math.random().toString(36).slice(2,9); ids.add(id); current.push({...it, id}); }
+                saveEntries(current);
+              }
+            });
             renderEntries(searchInput.value); showToast('Імпорт завершено','success');
           }catch(err){ showToast('Помилка імпорту: '+err.message,'error'); }
           IMPORT_FILE.value = '';
@@ -545,6 +601,8 @@
           for(const l of local) remoteMap.set(l.id, l);
           const newRemote = Array.from(remoteMap.values());
           localStorage.setItem(REMOTE_KEY, JSON.stringify(newRemote));
+          // set last sync
+          localStorage.setItem(REMOTE_KEY + '.lastSync', new Date().toISOString());
           // pull remote -> merge into local
           const localMap = new Map(loadEntries().map(r=>[r.id, r]));
           let added = 0;
@@ -552,11 +610,24 @@
           const merged = Array.from(localMap.values()); saveEntries(merged);
           renderEntries(searchInput.value);
           showToast('Синхронізація завершена' + (added? `: додано ${added} записів` : ''),'success');
-          setTimeout(()=>{ SYNC_STATUS.textContent=''; SYNC_BTN.disabled=false; }, 1200);
+          setTimeout(()=>{ SYNC_STATUS.textContent=''; SYNC_BTN.disabled=false; updateStats(); }, 1200);
         }, 800);
       }
       SYNC_BTN.addEventListener('click', doSync);
       const syncBtnSide = document.getElementById('sync-btn-side'); if(syncBtnSide) syncBtnSide.addEventListener('click', doSync);
+
+      // Update statistics widget
+      function updateStats(){
+        const list = loadEntries();
+        const total = list.length;
+        const favs = list.filter(e=>e.favorite).length;
+        const totalEl = document.getElementById('total-count'); if(totalEl) totalEl.textContent = total;
+        const favEl = document.getElementById('favorites-count'); if(favEl) favEl.textContent = favs;
+        const lastSyncISO = localStorage.getItem(REMOTE_KEY + '.lastSync');
+        const lastSyncEl = document.getElementById('last-sync'); if(lastSyncEl) lastSyncEl.textContent = lastSyncISO ? new Date(lastSyncISO).toLocaleString('uk-UA') : '—';
+      }
+      const refreshStatsBtn = document.getElementById('refresh-stats'); refreshStatsBtn && refreshStatsBtn.addEventListener('click', ()=>{ updateStats(); showToast('Статистика оновлена','success'); });
+      const clearAllBtn = document.getElementById('clear-all'); clearAllBtn && clearAllBtn.addEventListener('click', ()=>{ confirmModal('Ви впевнені, що хочете видалити ВСІ записи?').then(ok=>{ if(ok){ saveEntries([]); showToast('Усі записи видалено','success'); renderEntries(); } }); });
 
       // Favorites and sorting
       let showFavoritesOnly = false;
@@ -583,7 +654,7 @@
         else showToast('Налаштування профілю поки недоступні','info');
       });
 
-      CLEAR_DRAFT_BTN && CLEAR_DRAFT_BTN.addEventListener('click', ()=>{ if(confirm('Очистити чернетку?')) { clearDraft(); showToast('Чернетка очищена'); } });
+      CLEAR_DRAFT_BTN && CLEAR_DRAFT_BTN.addEventListener('click', ()=>{ confirmModal('Очистити чернетку?').then(ok=>{ if(ok){ clearDraft(); showToast('Чернетка очищена'); } }); });
 
       // init
       renderEntries();
@@ -597,9 +668,11 @@
 
       // close profile menu if clicked outside
       document.addEventListener('click', (e)=>{
-        if(!profileBtn.contains(e.target) && !profileMenu.contains(e.target)){
+        if(!profileMenu) return;
+        const clickedOnProfile = profileBtn && profileBtn.contains(e.target);
+        if(!clickedOnProfile && !profileMenu.contains(e.target)){
           profileMenu.classList.remove('open');
-          profileBtn.setAttribute('aria-expanded','false');
+          profileBtn && profileBtn.setAttribute('aria-expanded','false');
         }
       });
     </script>
