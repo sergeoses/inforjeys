@@ -5,28 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Щоденник — Inforjeys</title>
     <style>
-    :root{--accent:#6c63ff;--bg:#fff;--muted:#6b7280}
+    :root{
+      --accent:#6c63ff; --bg:#fff; --muted:#6b7280; --card:#fff; --text:#111; --muted-2:#9aa0a6
+    }
+    .dark{
+      --bg:#0f1724; --card:#0b1220; --text:#e6eef8; --muted:#9aa4b2; --muted-2:#7f8a98; background:#071026; color:var(--text)
+    }
     *{box-sizing:border-box}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;line-height:1.4;margin:0;color:#111;background:#f7f7fb}
+    html,body{height:100%}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;line-height:1.4;margin:0;color:var(--text);background:var(--bg)}
     .container{max-width:1100px;margin:0 auto;padding:0 1rem}
-    .site-header{background:linear-gradient(90deg,#fff,#f8f8ff);border-bottom:1px solid #e6e9ef;position:sticky;top:0;z-index:100}
+    .site-header{background:linear-gradient(90deg,var(--card),rgba(255,255,255,0.02));border-bottom:1px solid rgba(0,0,0,0.06);position:sticky;top:0;z-index:100}
     .site-header .container{display:flex;align-items:center;gap:1rem;padding:0.5rem 1rem}
     .logo{font-weight:700;color:var(--accent);text-decoration:none;font-size:1.1rem}
     .logo .tagline{font-weight:400;color:var(--muted);font-size:0.9rem;margin-left:0.5rem}
     .main-nav ul{list-style:none;margin:0;padding:0;display:flex;gap:0.5rem;align-items:center}
-    .main-nav a{display:inline-block;padding:0.5rem 0.75rem;color:#111;text-decoration:none;border-radius:6px}
-    .main-nav a:hover{background:#eef}
-    .btn.new-entry{background:var(--accent);color:#fff}
-    .nav-toggle{display:none;background:transparent;border:0;font-size:1.2rem}
+    .main-nav a{display:inline-block;padding:0.5rem 0.75rem;color:var(--text);text-decoration:none;border-radius:6px}
+    .main-nav a:hover{background:rgba(108,102,255,0.08)}
+    .actions{margin-left:auto;display:flex;gap:0.5rem;align-items:center}
+    .btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;border-radius:8px;border:0;background:transparent;color:var(--text);cursor:pointer}
+    .btn.primary{background:var(--accent);color:#fff}
+    .theme-toggle{font-size:1.1rem}
+    .profile{position:relative}
+    .profile-btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.25rem;border-radius:999px;border:0;background:transparent;cursor:pointer}
+    .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(45deg,var(--accent),#4b9bff);display:inline-block;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .profile-menu{position:absolute;right:0;top:48px;background:var(--card);border:1px solid rgba(0,0,0,0.06);padding:0.5rem;border-radius:8px;min-width:180px;box-shadow:0 8px 24px rgba(2,6,23,0.17);display:none}
+    .profile-menu.open{display:block}
+    .profile-menu a, .profile-menu button{display:block;padding:0.5rem;border:0;background:transparent;width:100%;text-align:left;color:var(--text);cursor:pointer}
+
+    /* Main */
     .site-main{padding:2rem 1rem}
     .today{color:var(--muted);margin-top:0.25rem}
+    .controls{display:flex;gap:0.5rem;align-items:center;margin:1rem 0}
+    .search{flex:1}
+
+    /* Entries */
+    .entries{margin-top:1rem}
+    .entries-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem}
+    .entry-card{background:var(--card);border:1px solid rgba(0,0,0,0.04);padding:1rem;border-radius:10px;box-shadow:0 6px 18px rgba(2,6,23,0.04)}
+    .entry-card h3{margin:0 0 0.5rem 0}
+    .entry-meta{color:var(--muted-2);font-size:0.9rem;margin-bottom:0.5rem}
+    .entry-actions{display:flex;gap:0.5rem;margin-top:0.5rem}
+    .btn.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06)}
+
+    .empty{color:var(--muted);padding:1rem 0}
+
+    /* Modal */
+    .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,0.45);padding:1rem}
+    .modal-card{background:var(--card);width:100%;max-width:680px;border-radius:10px;padding:1rem;border:1px solid rgba(0,0,0,0.06)}
+    .modal-card h2{margin-top:0}
+    .form-row{display:flex;gap:0.5rem}
+    .form-row input, .form-row textarea{flex:1;padding:0.6rem;border-radius:6px;border:1px solid rgba(0,0,0,0.06);background:transparent;color:var(--text)}
+    textarea{min-height:140px}
+    .modal-actions{display:flex;gap:0.5rem;justify-content:flex-end;margin-top:0.75rem}
 
     /* Responsive */
     @media(max-width:700px){
-      .nav-toggle{display:inline-block;margin-left:auto}
-      .main-nav{position:absolute;top:56px;left:0;right:0;background:#fff;padding:1rem;border-top:1px solid #eee;box-shadow:0 10px 30px rgba(0,0,0,0.05);transform-origin:top;display:none}
+      .main-nav{position:absolute;top:56px;left:0;right:0;background:var(--card);padding:1rem;border-top:1px solid rgba(0,0,0,0.04);box-shadow:0 10px 30px rgba(0,0,0,0.05);transform-origin:top;display:none}
       .main-nav.open{display:block}
       .main-nav ul{flex-direction:column;gap:0.25rem}
+      .actions{gap:0.25rem}
     }
     </style>
 </head>"
@@ -35,6 +73,7 @@
       <div class="container">
         <a href="#" class="logo">Inforjeys <span class="tagline">Щоденник</span></a>
         <button class="nav-toggle" aria-expanded="false" aria-label="Відкрити меню">☰</button>
+
         <nav class="main-nav" id="main-nav">
           <ul>
             <li><a href="#">Головна</a></li>
@@ -43,24 +82,260 @@
             <li><a href="#">Про сайт</a></li>
           </ul>
         </nav>
+
+        <div class="actions">
+          <button class="btn theme-toggle" id="theme-toggle" aria-label="Змінити тему">🌙</button>
+          <div class="profile">
+            <button class="profile-btn" id="profile-btn" aria-haspopup="true" aria-expanded="false">
+              <span class="avatar" id="avatar">U</span>
+            </button>
+            <div class="profile-menu" id="profile-menu" role="menu">
+              <div style="padding:0.5rem 0.5rem; border-bottom:1px solid rgba(0,0,0,0.04);">
+                <strong id="profile-name">Гість</strong>
+                <div style="font-size:0.85rem;color:var(--muted)">Налаштування профілю</div>
+              </div>
+              <button id="sign-in">Увійти</button>
+              <button id="sign-out" style="display:none">Вийти</button>
+            </div>
+          </div>
+        </div>
       </div>
     </header>
 
     <main class="site-main container">
       <h1>Ласкаво просимо до вашого щоденника</h1>
       <p class="today">Сьогодні: <span id="today"></span></p>
-      <!-- Тут будуть записи -->
+
+      <div class="controls">
+        <input type="search" placeholder="Пошук записів..." class="search" id="search" />
+        <button class="btn primary new-entry" id="open-new">Нова запис</button>
+      </div>
+
+      <section class="entries" id="entries-section">
+        <div class="entries-grid" id="entries-grid">
+          <!-- Cards -->
+        </div>
+        <p class="empty" id="empty-state">У вас ще немає записів. Натисніть "Нова запис", щоб додати перший.</p>
+      </section>
     </main>
 
+    <!-- Modal -->
+    <div class="modal" id="entry-modal" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <h2 id="modal-title">Нова запис</h2>
+        <form id="entry-form">
+          <input type="hidden" id="entry-id">
+          <div class="form-row">
+            <input id="entry-title" placeholder="Заголовок" required />
+            <input id="entry-date" type="date" />
+          </div>
+          <div style="margin-top:0.5rem">
+            <textarea id="entry-content" placeholder="Ваш запис..." required></textarea>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn ghost" id="cancel">Скасувати</button>
+            <button type="submit" class="btn primary" id="save">Зберегти</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <script>
-      // Встановлює дату та перемикає мобільне меню
-      document.getElementById('today').textContent = new Date().toLocaleDateString('uk-UA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-      const toggle = document.querySelector('.nav-toggle');
+      // ---- Загальні елементи ----
+      const todayEl = document.getElementById('today');
+      const navToggle = document.querySelector('.nav-toggle');
       const nav = document.getElementById('main-nav');
-      toggle.addEventListener('click', () => {
-        const expanded = toggle.getAttribute('aria-expanded') === 'true';
-        toggle.setAttribute('aria-expanded', String(!expanded));
+      const themeToggle = document.getElementById('theme-toggle');
+      const bodyEl = document.documentElement;
+      const profileBtn = document.getElementById('profile-btn');
+      const profileMenu = document.getElementById('profile-menu');
+      const avatarEl = document.getElementById('avatar');
+      const profileName = document.getElementById('profile-name');
+      const signInBtn = document.getElementById('sign-in');
+      const signOutBtn = document.getElementById('sign-out');
+
+      // ---- Дата ----
+      todayEl.textContent = new Date().toLocaleDateString('uk-UA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+      // ---- Навігація ----
+      navToggle.addEventListener('click', () => {
+        const expanded = navToggle.getAttribute('aria-expanded') === 'true';
+        navToggle.setAttribute('aria-expanded', String(!expanded));
         nav.classList.toggle('open');
+      });
+
+      // ---- Тема ----
+      const THEME_KEY = 'diary.theme';
+      function applyTheme(theme){
+        if(theme === 'dark') document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+        themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+      }
+      const savedTheme = localStorage.getItem(THEME_KEY) || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      applyTheme(savedTheme);
+      themeToggle.addEventListener('click', () => {
+        const current = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        const next = current === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(THEME_KEY, next);
+        applyTheme(next);
+      });
+
+      // ---- Профіль (мок) ----
+      const USER_KEY = 'diary.user';
+      function renderUser(){
+        const user = JSON.parse(localStorage.getItem(USER_KEY));
+        if(user){
+          profileName.textContent = user.name;
+          avatarEl.textContent = (user.name || 'U').slice(0,1).toUpperCase();
+          signInBtn.style.display = 'none';
+          signOutBtn.style.display = 'block';
+        } else {
+          profileName.textContent = 'Гість';
+          avatarEl.textContent = 'G';
+          signInBtn.style.display = 'block';
+          signOutBtn.style.display = 'none';
+        }
+      }
+      profileBtn.addEventListener('click', ()=>{
+        const open = profileMenu.classList.toggle('open');
+        profileBtn.setAttribute('aria-expanded', String(open));
+      });
+      signInBtn.addEventListener('click', ()=>{
+        const name = prompt('Введіть своє ім\'я:', 'Користувач');
+        if(name){
+          localStorage.setItem(USER_KEY, JSON.stringify({name}));
+          renderUser();
+          profileMenu.classList.remove('open');
+        }
+      });
+      signOutBtn.addEventListener('click', ()=>{
+        localStorage.removeItem(USER_KEY);
+        renderUser();
+        profileMenu.classList.remove('open');
+      });
+      renderUser();
+
+      // ---- Записи ----
+      const ENTRIES_KEY = 'diary.entries';
+      const entriesGrid = document.getElementById('entries-grid');
+      const emptyState = document.getElementById('empty-state');
+      const openNewBtn = document.getElementById('open-new');
+      const modal = document.getElementById('entry-modal');
+      const entryForm = document.getElementById('entry-form');
+      const entryId = document.getElementById('entry-id');
+      const entryTitle = document.getElementById('entry-title');
+      const entryContent = document.getElementById('entry-content');
+      const entryDate = document.getElementById('entry-date');
+      const cancelBtn = document.getElementById('cancel');
+      const searchInput = document.getElementById('search');
+
+      function loadEntries(){
+        try{ return JSON.parse(localStorage.getItem(ENTRIES_KEY) || '[]'); } catch(e){ return []; }
+      }
+      function saveEntries(list){
+        localStorage.setItem(ENTRIES_KEY, JSON.stringify(list));
+      }
+
+      function formatDate(iso){
+        return new Date(iso).toLocaleString('uk-UA', { year:'numeric', month:'short', day:'numeric' });
+      }
+
+      function renderEntries(filter=''){
+        const list = loadEntries().filter(e => (e.title + ' ' + e.content).toLowerCase().includes(filter.toLowerCase()));
+        entriesGrid.innerHTML = '';
+        if(list.length === 0){ emptyState.style.display = 'block'; return; }
+        emptyState.style.display = 'none';
+        list.sort((a,b)=> new Date(b.updated||b.created) - new Date(a.updated||a.created));
+        for(const entry of list){
+          const card = document.createElement('article');
+          card.className = 'entry-card';
+          card.innerHTML = `
+            <h3>${escapeHtml(entry.title)}</h3>
+            <div class="entry-meta">${formatDate(entry.date || entry.created)}</div>
+            <div>${escapeHtml(entry.content).slice(0,250)}${entry.content.length>250? '...':''}</div>
+            <div class="entry-actions">
+              <button class="btn ghost" data-id="${entry.id}" data-action="edit">Редагувати</button>
+              <button class="btn ghost" data-id="${entry.id}" data-action="delete">Видалити</button>
+            </div>
+          `;
+          entriesGrid.appendChild(card);
+        }
+      }
+
+      function escapeHtml(str){
+        return String(str||'').replace(/[&<>"']/g, (s)=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[s]);
+      }
+
+      function openModal(entry){
+        modal.hidden = false;
+        if(entry){
+          document.getElementById('modal-title').textContent = 'Редагувати запис';
+          entryId.value = entry.id;
+          entryTitle.value = entry.title;
+          entryContent.value = entry.content;
+          entryDate.value = entry.date ? (new Date(entry.date)).toISOString().slice(0,10) : '';
+        } else {
+          document.getElementById('modal-title').textContent = 'Нова запис';
+          entryId.value = '';
+          entryTitle.value = '';
+          entryContent.value = '';
+          entryDate.value = '';
+        }
+      }
+      function closeModal(){ modal.hidden = true; }
+
+      openNewBtn.addEventListener('click', ()=> openModal());
+      cancelBtn.addEventListener('click', ()=> closeModal());
+      modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
+
+      entryForm.addEventListener('submit', (e)=>{
+        e.preventDefault();
+        const list = loadEntries();
+        const now = new Date().toISOString();
+        if(entryId.value){
+          const idx = list.findIndex(x=>x.id===entryId.value);
+          if(idx>-1){
+            list[idx].title = entryTitle.value;
+            list[idx].content = entryContent.value;
+            list[idx].date = entryDate.value ? new Date(entryDate.value).toISOString() : now;
+            list[idx].updated = now;
+          }
+        } else {
+          list.push({id: 'id-'+Math.random().toString(36).slice(2,9), title: entryTitle.value, content: entryContent.value, created: now, date: entryDate.value ? new Date(entryDate.value).toISOString() : now});
+        }
+        saveEntries(list);
+        closeModal();
+        renderEntries(searchInput.value);
+      });
+
+      entriesGrid.addEventListener('click', (e)=>{
+        const btn = e.target.closest('button');
+        if(!btn) return;
+        const id = btn.dataset.id;
+        const action = btn.dataset.action;
+        if(action === 'edit'){
+          const list = loadEntries();
+          openModal(list.find(x=>x.id===id));
+        } else if(action === 'delete'){
+          if(confirm('Ви впевнені, що хочете видалити запис?')){
+            const list = loadEntries().filter(x=>x.id!==id);
+            saveEntries(list);
+            renderEntries(searchInput.value);
+          }
+        }
+      });
+
+      searchInput.addEventListener('input', ()=> renderEntries(searchInput.value));
+
+      // init
+      renderEntries();
+
+      // close profile menu if clicked outside
+      document.addEventListener('click', (e)=>{
+        if(!profileBtn.contains(e.target) && !profileMenu.contains(e.target)){
+          profileMenu.classList.remove('open');
+          profileBtn.setAttribute('aria-expanded','false');
+        }
       });
     </script>
   </body>
