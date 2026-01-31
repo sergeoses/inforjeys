@@ -1,3 +1,3 @@
 # inforjeys
 Notes and Think
-https://github.io/sergeoses/inforjeys
+https://github.io/sergeoses/
