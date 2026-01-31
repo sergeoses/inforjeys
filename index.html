@@ -4,87 +4,114 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Щоденник — Inforjeys</title>
+    <!-- Fonts inspired by WordPress themes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
     :root{
-      --accent:#6c63ff; --bg:#fff; --muted:#6b7280; --card:#fff; --text:#111; --muted-2:#9aa0a6
+      --wp-accent:#21759b; --wp-admin:#23282d; --bg:#f6f7f8; --card:#ffffff; --text:#222; --muted:#6c757d; --muted-2:#9aa0a6; --radius:8px
     }
-    .dark{
-      --bg:#0f1724; --card:#0b1220; --text:#e6eef8; --muted:#9aa4b2; --muted-2:#7f8a98; background:#071026; color:var(--text)
-    }
+    .dark{--bg:#0b1220; --card:#0f1724; --text:#e6eef8; --muted:#9aa4b2}
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;line-height:1.4;margin:0;color:var(--text);background:var(--bg)}
-    .container{max-width:1100px;margin:0 auto;padding:0 1rem}
-    .site-header{background:linear-gradient(90deg,var(--card),rgba(255,255,255,0.02));border-bottom:1px solid rgba(0,0,0,0.06);position:sticky;top:0;z-index:100}
-    .site-header .container{display:flex;align-items:center;gap:1rem;padding:0.5rem 1rem}
-    .logo{font-weight:700;color:var(--accent);text-decoration:none;font-size:1.1rem}
-    .logo .tagline{font-weight:400;color:var(--muted);font-size:0.9rem;margin-left:0.5rem}
-    .main-nav ul{list-style:none;margin:0;padding:0;display:flex;gap:0.5rem;align-items:center}
-    .main-nav a{display:inline-block;padding:0.5rem 0.75rem;color:var(--text);text-decoration:none;border-radius:6px}
-    .main-nav a:hover{background:rgba(108,102,255,0.08)}
-    .actions{margin-left:auto;display:flex;gap:0.5rem;align-items:center}
-    .btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;border-radius:8px;border:0;background:transparent;color:var(--text);cursor:pointer}
-    .btn.primary{background:var(--accent);color:#fff}
-    .theme-toggle{font-size:1.1rem}
-    .profile{position:relative}
-    .profile-btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.25rem;border-radius:999px;border:0;background:transparent;cursor:pointer}
-    .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(45deg,var(--accent),#4b9bff);display:inline-block;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
-    .profile-menu{position:absolute;right:0;top:48px;background:var(--card);border:1px solid rgba(0,0,0,0.06);padding:0.5rem;border-radius:8px;min-width:180px;box-shadow:0 8px 24px rgba(2,6,23,0.17);display:none}
-    .profile-menu.open{display:block}
-    .profile-menu a, .profile-menu button{display:block;padding:0.5rem;border:0;background:transparent;width:100%;text-align:left;color:var(--text);cursor:pointer}
+    body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;line-height:1.6;margin:0;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
+    .container{max-width:1180px;margin:0 auto;padding:0 1rem}
 
-    /* Main */
-    .site-main{padding:2rem 1rem}
-    .today{color:var(--muted);margin-top:0.25rem}
-    .controls{display:flex;gap:0.5rem;align-items:center;margin:1rem 0}
-    .search{flex:1}
+    /* subtle textured background */
+    body::before{content:'';position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(transparent 0 60%, rgba(0,0,0,0.015) 100%);opacity:0.6}
+
+    /* Admin bar */
+    .admin-bar{background:var(--wp-admin);color:#fff;font-size:0.9rem}
+    .admin-bar .container{display:flex;align-items:center;justify-content:space-between;padding:0.6rem 1rem}
+    .admin-bar a{color:#fff;text-decoration:none;opacity:0.95}
+
+    /* Header */
+    .site-header{background:var(--card);border-bottom:1px solid rgba(0,0,0,0.06);position:sticky;top:32px;z-index:100}
+    .site-header .container{display:flex;align-items:center;gap:1rem;padding:0.85rem 1rem}
+    .site-brand{display:flex;flex-direction:column}
+    .site-title{font-family:Merriweather,Georgia,serif;font-size:1.4rem;margin:0;color:var(--wp-accent);font-weight:700}
+    .site-tagline{font-size:0.85rem;color:var(--muted)}
+
+    .main-nav ul{list-style:none;margin:0;padding:0;display:flex;gap:0.5rem;align-items:center}
+    .main-nav a{display:inline-block;padding:0.5rem 0.7rem;color:var(--text);text-decoration:none;border-radius:6px}
+    .main-nav a:hover{background:rgba(33,117,155,0.06)}
+
+    .actions{margin-left:auto;display:flex;gap:0.5rem;align-items:center}
+    .btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.5rem 0.9rem;border-radius:6px;border:1px solid transparent;background:transparent;color:var(--text);cursor:pointer;font-weight:600;transition:all 180ms ease}
+    .btn svg{width:16px;height:16px;opacity:0.9}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(2,6,23,0.06)}
+    .btn.primary{background:var(--wp-accent);color:#fff;border-color:var(--wp-accent)}
+    .btn.ghost{background:transparent;border-color:rgba(0,0,0,0.06)}
+
+    /* Layout */
+    .layout{display:grid;grid-template-columns: 1fr 320px;gap:1.5rem;align-items:start}
+    @media(max-width:980px){ .layout{grid-template-columns:1fr} }
 
     /* Entries */
-    .entries{margin-top:1rem}
-    .entries-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem}
-    .entry-card{background:var(--card);border:1px solid rgba(0,0,0,0.04);padding:1rem;border-radius:10px;box-shadow:0 6px 18px rgba(2,6,23,0.04)}
-    .entry-card h3{margin:0 0 0.5rem 0}
+    .entries-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem}
+    .entry-card{background:var(--card);border:1px solid rgba(0,0,0,0.04);padding:1.1rem;border-radius:var(--radius);box-shadow:0 8px 24px rgba(2,6,23,0.06);transition:transform 180ms ease,box-shadow 180ms ease}
+    .entry-card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(2,6,23,0.08)}
+    .entry-card h3{margin:0 0 0.35rem 0;font-family:Merriweather,Georgia,serif;font-size:1.05rem}
     .entry-meta{color:var(--muted-2);font-size:0.9rem;margin-bottom:0.5rem}
-    .entry-actions{display:flex;gap:0.5rem;margin-top:0.5rem}
-    .btn.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06)}
+    .excerpt{color:var(--muted);line-height:1.5;max-height:4.5em;overflow:hidden;position:relative}
+    .excerpt::after{content:'';position:absolute;right:0;bottom:0;left:0;height:2.2em;background:linear-gradient(transparent, var(--card))}
+    .entry-actions{display:flex;gap:0.4rem;margin-top:0.75rem}
 
-    .empty{color:var(--muted);padding:1rem 0}
+    /* Sidebar */
+    .sidebar{position:relative}
+    .widget{background:var(--card);border:1px solid rgba(0,0,0,0.04);padding:0.9rem;border-radius:10px;margin-bottom:1rem}
+    .widget h4{margin:0 0 0.5rem 0;font-size:0.95rem}
+    .small{font-size:0.85rem;color:var(--muted)}
 
     /* Modal */
-    .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,0.45);padding:1rem}
-    .modal-card{background:var(--card);width:100%;max-width:680px;border-radius:10px;padding:1rem;border:1px solid rgba(0,0,0,0.06)}
-    .modal-card h2{margin-top:0}
-    .form-row{display:flex;gap:0.5rem}
-    .form-row input, .form-row textarea{flex:1;padding:0.6rem;border-radius:6px;border:1px solid rgba(0,0,0,0.06);background:transparent;color:var(--text)}
-    textarea{min-height:140px}
-    .modal-actions{display:flex;gap:0.5rem;justify-content:flex-end;margin-top:0.75rem}
+    .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,0.45);padding:1rem;opacity:0;pointer-events:none;transition:opacity 200ms ease}
+    .modal.open{opacity:1;pointer-events:auto}
+    .modal-card{background:var(--card);width:100%;max-width:720px;border-radius:10px;padding:1rem;border:1px solid rgba(0,0,0,0.06);transform:translateY(-12px);transition:transform 200ms ease}
+    .modal.open .modal-card{transform:translateY(0)}
+    .modal-close{position:absolute;right:12px;top:12px;background:transparent;border:0;padding:6px;border-radius:6px;cursor:pointer}
 
-    /* Responsive */
-    @media(max-width:700px){
-      .main-nav{position:absolute;top:56px;left:0;right:0;background:var(--card);padding:1rem;border-top:1px solid rgba(0,0,0,0.04);box-shadow:0 10px 30px rgba(0,0,0,0.05);transform-origin:top;display:none}
-      .main-nav.open{display:block}
-      .main-nav ul{flex-direction:column;gap:0.25rem}
-      .actions{gap:0.25rem}
-    }
+    /* Toasts */
+    #toast-container{position:fixed;right:16px;bottom:20px;z-index:150;display:flex;flex-direction:column;gap:0.5rem}
+    .toast{background:#fff;padding:0.6rem 0.9rem;border-radius:6px;border-left:4px solid var(--wp-accent);box-shadow:0 6px 24px rgba(2,6,23,0.12);min-width:220px}
+    .toast.error{border-left-color:#e35b4a}
+    .toast.success{border-left-color:#28a745}
+    .toast .muted{font-size:0.85rem;color:var(--muted);margin-top:0.2rem}
+
+    .empty{color:var(--muted);padding:1rem 0;text-align:center}
+
+    @media(max-width:540px){ .btn{padding:0.45rem 0.6rem} .site-title{font-size:1.05rem} }
     </style>
 </head>"
 <body>
+    <div class="admin-bar">
+      <div class="container">
+        <div>Привіт, <strong id="admin-name">Гість</strong></div>
+        <div style="font-size:0.9rem"><a href="#" id="dashboard-link">Панель керування</a></div>
+      </div>
+    </div>
+
     <header class="site-header">
       <div class="container">
-        <a href="#" class="logo">Inforjeys <span class="tagline">Щоденник</span></a>
-        <button class="nav-toggle" aria-expanded="false" aria-label="Відкрити меню">☰</button>
+        <div class="site-brand">
+          <a href="#" class="site-title">Inforjeys</a>
+          <div class="site-tagline">Щоденник — особисті записи</div>
+        </div>
 
-        <nav class="main-nav" id="main-nav">
+        <nav class="main-nav" id="main-nav" aria-label="Головна навігація">
           <ul>
             <li><a href="#">Головна</a></li>
             <li><a href="#">Записи</a></li>
-            <li><a href="#" class="btn new-entry">Нова запис</a></li>
             <li><a href="#">Про сайт</a></li>
           </ul>
         </nav>
 
         <div class="actions">
+          <button class="btn ghost" id="export-btn" title="Експорт записів">Експорт</button>
+          <button class="btn ghost" id="import-btn" title="Імпорт записів">Імпорт</button>
+          <button class="btn ghost" id="sync-btn" title="Синхронізувати">Синхронізувати</button>
           <button class="btn theme-toggle" id="theme-toggle" aria-label="Змінити тему">🌙</button>
+          <button class="btn primary new-entry" id="open-new">Нова запис</button>
           <div class="profile">
             <button class="profile-btn" id="profile-btn" aria-haspopup="true" aria-expanded="false">
               <span class="avatar" id="avatar">U</span>
@@ -106,23 +133,61 @@
       <h1>Ласкаво просимо до вашого щоденника</h1>
       <p class="today">Сьогодні: <span id="today"></span></p>
 
-      <div class="controls">
-        <input type="search" placeholder="Пошук записів..." class="search" id="search" />
-        <button class="btn primary new-entry" id="open-new">Нова запис</button>
-      </div>
+      <div class="layout">
+        <section class="content">
+          <div class="controls">
+            <input type="search" placeholder="Пошук записів..." class="search" id="search" />
+          </div>
 
-      <section class="entries" id="entries-section">
-        <div class="entries-grid" id="entries-grid">
-          <!-- Cards -->
-        </div>
-        <p class="empty" id="empty-state">У вас ще немає записів. Натисніть "Нова запис", щоб додати перший.</p>
-      </section>
+          <section class="entries" id="entries-section">
+            <div class="entries-grid" id="entries-grid">
+              <!-- Cards -->
+            </div>
+            <div class="empty" id="empty-state">
+              <div style="padding:1.25rem;background:linear-gradient(90deg, rgba(33,117,155,0.04), rgba(33,117,155,0.02));border-radius:10px;display:inline-block">
+                <div style="font-size:1.25rem;margin-bottom:0.5rem">Ще немає записів</div>
+                <div class="small" style="margin-bottom:0.75rem">Натисніть кнопку нижче, щоб додати перший запис.</div>
+                <div><button class="btn primary" id="empty-new">Додати запис</button></div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <aside class="sidebar" aria-label="Бічна панель">
+          <div class="widget">
+            <h4>Швидкі дії</h4>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+              <button class="btn ghost" id="export-btn-side">Експорт</button>
+              <button class="btn ghost" id="import-btn-side">Імпорт</button>
+              <button class="btn ghost" id="sync-btn-side">Синхронізувати</button>
+            </div>
+            <div class="small" id="sync-status" style="margin-top:0.5rem">Статус: готово</div>
+          </div>
+
+          <div class="widget">
+            <h4>Профіль</h4>
+            <div class="small">Користувач: <strong id="sidebar-user">Гість</strong></div>
+            <div style="margin-top:0.5rem"><button class="btn" id="open-profile-settings">Налаштувати профіль</button></div>
+          </div>
+
+          <div class="widget">
+            <h4>Поради</h4>
+            <div class="small">Це перша версія. Ви можете експортувати/імпортувати записи або синхронізувати з віддаленим сховищем (mock).</div>
+          </div>
+        </aside>
+      </div>
     </main>
 
+    <!-- Toasts -->
+    <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+    <input type="file" id="import-file" accept="application/json" style="display:none" />
+
     <!-- Modal -->
-    <div class="modal" id="entry-modal" hidden>
+    <div class="modal" id="entry-modal" aria-hidden="true">
       <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <button class="modal-close" id="modal-close" aria-label="Закрити">✕</button>
         <h2 id="modal-title">Нова запис</h2>
+        <div id="draft-status" style="font-size:0.9rem;color:var(--muted);margin-top:0.25rem"></div>
         <form id="entry-form">
           <input type="hidden" id="entry-id">
           <div class="form-row">
@@ -133,6 +198,7 @@
             <textarea id="entry-content" placeholder="Ваш запис..." required></textarea>
           </div>
           <div class="modal-actions">
+            <button type="button" class="btn ghost" id="clear-draft" style="display:none">Очистити чернетку</button>
             <button type="button" class="btn ghost" id="cancel">Скасувати</button>
             <button type="submit" class="btn primary" id="save">Зберегти</button>
           </div>
@@ -158,11 +224,13 @@
       todayEl.textContent = new Date().toLocaleDateString('uk-UA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
       // ---- Навігація ----
-      navToggle.addEventListener('click', () => {
-        const expanded = navToggle.getAttribute('aria-expanded') === 'true';
-        navToggle.setAttribute('aria-expanded', String(!expanded));
-        nav.classList.toggle('open');
-      });
+      if(navToggle){
+        navToggle.addEventListener('click', () => {
+          const expanded = navToggle.getAttribute('aria-expanded') === 'true';
+          navToggle.setAttribute('aria-expanded', String(!expanded));
+          if(nav) nav.classList.toggle('open');
+        });
+      }
 
       // ---- Тема ----
       const THEME_KEY = 'diary.theme';
@@ -215,6 +283,16 @@
       });
       renderUser();
 
+      // Toaster
+      const toastContainer = document.getElementById('toast-container');
+      function showToast(message, type='info', timeout=3000){
+        const t = document.createElement('div'); t.className = 'toast '+(type==='error'?'error': type==='success'?'success':'');
+        t.innerHTML = `<div>${message}</div>`;
+        toastContainer.appendChild(t);
+        requestAnimationFrame(()=> t.style.opacity=1);
+        setTimeout(()=>{ t.style.transition='opacity 300ms'; t.style.opacity=0; setTimeout(()=>t.remove(),300); }, timeout);
+      }
+
       // ---- Записи ----
       const ENTRIES_KEY = 'diary.entries';
       const entriesGrid = document.getElementById('entries-grid');
@@ -228,6 +306,44 @@
       const entryDate = document.getElementById('entry-date');
       const cancelBtn = document.getElementById('cancel');
       const searchInput = document.getElementById('search');
+      const EXPORT_BTN = document.getElementById('export-btn');
+      const IMPORT_BTN = document.getElementById('import-btn');
+      const IMPORT_FILE = document.getElementById('import-file');
+      const SYNC_BTN = document.getElementById('sync-btn');
+      const SYNC_STATUS = document.getElementById('sync-status');
+      const DRAFT_STATUS = document.getElementById('draft-status');
+      const CLEAR_DRAFT_BTN = document.getElementById('clear-draft');
+
+      const DRAFT_KEY = 'diary.draft';
+      const REMOTE_KEY = 'diary.remote';
+      let draftTimer = null;
+
+      function scheduleDraftSave(){
+        if(draftTimer) clearTimeout(draftTimer);
+        draftTimer = setTimeout(saveDraft, 700);
+        DRAFT_STATUS.textContent = 'Зберігається...';
+      }
+      function saveDraft(){
+        const payload = { title: entryTitle.value, content: entryContent.value, date: entryDate.value, updated: new Date().toISOString() };
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
+        DRAFT_STATUS.textContent = 'Чернетка збережена';
+        CLEAR_DRAFT_BTN.style.display = 'inline-flex';
+      }
+      function loadDraft(){ try{ return JSON.parse(localStorage.getItem(DRAFT_KEY)); }catch(e){return null;} }
+      function clearDraft(){ localStorage.removeItem(DRAFT_KEY); DRAFT_STATUS.textContent = ''; CLEAR_DRAFT_BTN.style.display = 'none'; }
+
+      [entryTitle, entryContent, entryDate].forEach(el=> el.addEventListener('input', ()=> scheduleDraftSave()));
+
+      // Delegate export to unified handler (defined later)
+      EXPORT_BTN && EXPORT_BTN.addEventListener('click', ()=> exportData && exportData());
+
+      // Trigger file selector; actual import handling is attached below
+      IMPORT_BTN && IMPORT_BTN.addEventListener('click', ()=> IMPORT_FILE && IMPORT_FILE.click());
+
+      // Delegate to unified sync handler defined later
+      SYNC_BTN && SYNC_BTN.addEventListener('click', ()=> doSync && doSync());
+
+      // Clear draft handled below (duplicate removed)
 
       function loadEntries(){
         try{ return JSON.parse(localStorage.getItem(ENTRIES_KEY) || '[]'); } catch(e){ return []; }
@@ -274,19 +390,69 @@
           entryTitle.value = entry.title;
           entryContent.value = entry.content;
           entryDate.value = entry.date ? (new Date(entry.date)).toISOString().slice(0,10) : '';
+          DRAFT_STATUS.textContent = '';
+          CLEAR_DRAFT_BTN.style.display = 'none';
         } else {
           document.getElementById('modal-title').textContent = 'Нова запис';
           entryId.value = '';
-          entryTitle.value = '';
-          entryContent.value = '';
-          entryDate.value = '';
+          const draft = loadDraft();
+          if(draft && (draft.title || draft.content)){
+            entryTitle.value = draft.title || '';
+            entryContent.value = draft.content || '';
+            entryDate.value = draft.date || '';
+            DRAFT_STATUS.textContent = 'Відновлена чернетка';
+            CLEAR_DRAFT_BTN.style.display = 'inline-flex';
+          } else {
+            entryTitle.value = '';
+            entryContent.value = '';
+            entryDate.value = '';
+            DRAFT_STATUS.textContent = '';
+            CLEAR_DRAFT_BTN.style.display = 'none';
+          }
         }
       }
       function closeModal(){ modal.hidden = true; }
 
+      // modal open/close with animation and body scroll lock
+      const modalCloseBtn = document.getElementById('modal-close');
+      function openModal(entry){
+        modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
+        if(entry){
+          document.getElementById('modal-title').textContent = 'Редагувати запис';
+          entryId.value = entry.id;
+          entryTitle.value = entry.title;
+          entryContent.value = entry.content;
+          entryDate.value = entry.date ? (new Date(entry.date)).toISOString().slice(0,10) : '';
+          DRAFT_STATUS.textContent = '';
+          CLEAR_DRAFT_BTN.style.display = 'none';
+        } else {
+          document.getElementById('modal-title').textContent = 'Нова запис';
+          entryId.value = '';
+          const draft = loadDraft();
+          if(draft && (draft.title || draft.content)){
+            entryTitle.value = draft.title || '';
+            entryContent.value = draft.content || '';
+            entryDate.value = draft.date || '';
+            DRAFT_STATUS.textContent = 'Відновлена чернетка';
+            CLEAR_DRAFT_BTN.style.display = 'inline-flex';
+          } else {
+            entryTitle.value = '';
+            entryContent.value = '';
+            entryDate.value = '';
+            DRAFT_STATUS.textContent = '';
+            CLEAR_DRAFT_BTN.style.display = 'none';
+          }
+        }
+      }
+      function closeModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+
       openNewBtn.addEventListener('click', ()=> openModal());
+      const emptyNewBtn = document.getElementById('empty-new'); if(emptyNewBtn) emptyNewBtn.addEventListener('click', ()=> openModal());
       cancelBtn.addEventListener('click', ()=> closeModal());
       modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
+      modalCloseBtn && modalCloseBtn.addEventListener('click', ()=> closeModal());
+      // ESC to close
+      document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') { if(modal.classList.contains('open')) closeModal(); } });
 
       entryForm.addEventListener('submit', (e)=>{
         e.preventDefault();
@@ -299,11 +465,14 @@
             list[idx].content = entryContent.value;
             list[idx].date = entryDate.value ? new Date(entryDate.value).toISOString() : now;
             list[idx].updated = now;
+            showToast('Запис оновлено','success');
           }
         } else {
           list.push({id: 'id-'+Math.random().toString(36).slice(2,9), title: entryTitle.value, content: entryContent.value, created: now, date: entryDate.value ? new Date(entryDate.value).toISOString() : now});
+          showToast('Запис збережено','success');
         }
         saveEntries(list);
+        clearDraft();
         closeModal();
         renderEntries(searchInput.value);
       });
@@ -321,14 +490,87 @@
             const list = loadEntries().filter(x=>x.id!==id);
             saveEntries(list);
             renderEntries(searchInput.value);
+            showToast('Запис видалено');
           }
         }
       });
 
       searchInput.addEventListener('input', ()=> renderEntries(searchInput.value));
 
+      // Export/Import
+      function exportData(){
+        try{
+          const data = loadEntries();
+          const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a'); a.href = url; a.download = 'inforjeys-entries.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+          showToast('Експорт завершено','success');
+        }catch(err){ showToast('Експорт не вдався: '+err.message,'error'); }
+      }
+      EXPORT_BTN.addEventListener('click', exportData);
+      const exportBtnSide = document.getElementById('export-btn-side'); if(exportBtnSide) exportBtnSide.addEventListener('click', exportData);
+
+      IMPORT_BTN && IMPORT_BTN.addEventListener('click', ()=> IMPORT_FILE.click());
+      const importBtnSide = document.getElementById('import-btn-side'); if(importBtnSide) importBtnSide.addEventListener('click', ()=> IMPORT_FILE.click());
+
+      IMPORT_FILE.addEventListener('change', (e)=>{
+        const file = e.target.files[0]; if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev)=>{
+          try{
+            const imported = JSON.parse(ev.target.result);
+            if(!Array.isArray(imported)) throw new Error('JSON має бути масивом записів');
+            if(confirm('Замінити на імпортовані записи? OK = ЗАМІНИТИ; Cancel = ДОДАТИ')){
+              const normalized = imported.map(it=> ({...it, id: it.id || 'imp-'+Math.random().toString(36).slice(2,9)}));
+              saveEntries(normalized);
+            } else {
+              const current = loadEntries(); const ids = new Set(current.map(x=>x.id));
+              for(const it of imported){ let id = it.id || 'imp-'+Math.random().toString(36).slice(2,9); if(ids.has(id)) id = 'imp-'+Math.random().toString(36).slice(2,9); ids.add(id); current.push({...it, id}); }
+              saveEntries(current);
+            }
+            renderEntries(searchInput.value); showToast('Імпорт завершено','success');
+          }catch(err){ showToast('Помилка імпорту: '+err.message,'error'); }
+          IMPORT_FILE.value = '';
+        };
+        reader.readAsText(file);
+      });
+
+      // Sync (mock)
+      function doSync(){
+        SYNC_BTN.disabled = true; SYNC_STATUS.textContent = 'Синхронізація...';
+        setTimeout(()=>{
+          let remote = JSON.parse(localStorage.getItem(REMOTE_KEY) || 'null');
+          if(!remote){ remote = [{id:'remote-1', title:'Запис з сервера', content:'Це запис, що на сервері', created: new Date().toISOString()}]; }
+          // merge local -> remote
+          const local = loadEntries();
+          const remoteMap = new Map(remote.map(r=>[r.id, r]));
+          for(const l of local) remoteMap.set(l.id, l);
+          const newRemote = Array.from(remoteMap.values());
+          localStorage.setItem(REMOTE_KEY, JSON.stringify(newRemote));
+          // pull remote -> merge into local
+          const localMap = new Map(loadEntries().map(r=>[r.id, r]));
+          let added = 0;
+          for(const r of newRemote){ if(!localMap.has(r.id)){ localMap.set(r.id, r); added++; } }
+          const merged = Array.from(localMap.values()); saveEntries(merged);
+          renderEntries(searchInput.value);
+          showToast('Синхронізація завершена' + (added? `: додано ${added} записів` : ''),'success');
+          setTimeout(()=>{ SYNC_STATUS.textContent=''; SYNC_BTN.disabled=false; }, 1200);
+        }, 800);
+      }
+      SYNC_BTN.addEventListener('click', doSync);
+      const syncBtnSide = document.getElementById('sync-btn-side'); if(syncBtnSide) syncBtnSide.addEventListener('click', doSync);
+
+      CLEAR_DRAFT_BTN && CLEAR_DRAFT_BTN.addEventListener('click', ()=>{ if(confirm('Очистити чернетку?')) clearDraft(); });
+
       // init
       renderEntries();
+
+      // load draft into modal when opening new
+      openNewBtn.addEventListener('click', ()=>{
+        const draft = loadDraft();
+        openModal();
+        if(draft && (draft.title || draft.content)) showToast('Відновлена чернетка','info');
+      });
 
       // close profile menu if clicked outside
       document.addEventListener('click', (e)=>{
