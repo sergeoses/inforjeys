@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Панель керування — Inforjeys</title>
+  <style>
+    body{font-family:Inter,system-ui,Arial;margin:2rem;color:#222}
+    .card{background:#fff;padding:1rem;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.06)}
+    a{color:#21759b}
+  </style>
+</head>
+<body>
+  <h1>Панель керування</h1>
+  <p class="card" id="summary">Завантаження статистики...</p>
+  <p><a href="index.html">← Повернутись</a></p>
+
+  <script>
+    (function(){
+      try{
+        const entries = JSON.parse(localStorage.getItem('diary.entries')||'[]');
+        const lastSync = localStorage.getItem('diary.remote.lastSync') || '—';
+        document.getElementById('summary').innerHTML = `
+          Всього записів: <strong>${entries.length}</strong><br/>
+          Остання синхронізація: <strong>${lastSync}</strong>
+        `;
+      }catch(e){
+        document.getElementById('summary').textContent = 'Не вдалося завантажити дані';
+      }
+    })();
+  </script>
+</body>
+</html>

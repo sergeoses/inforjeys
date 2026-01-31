@@ -18,7 +18,7 @@
     body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;line-height:1.6;margin:0;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
     .container{max-width:1180px;margin:0 auto;padding:0 1rem}
 
-    /* subtle textured background */
+   subtle textured background */
     body::before{content:'';position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(transparent 0 60%, rgba(0,0,0,0.015) 100%);opacity:0.6}
 
     /* Admin bar */
@@ -269,17 +269,24 @@
       function renderUser(){
         const user = JSON.parse(localStorage.getItem(USER_KEY));
         const authInd = document.getElementById('auth-indicator');
+        const adminNameEl = document.getElementById('admin-name');
+        const sidebarUserEl = document.getElementById('sidebar-user');
+
         if(user){
-          profileName.textContent = user.name;
-          avatarEl.textContent = (user.name || 'U').slice(0,1).toUpperCase();
-          signInBtn.style.display = 'none';
-          signOutBtn.style.display = 'block';
+          if(profileName) profileName.textContent = user.name;
+          if(adminNameEl) adminNameEl.textContent = user.name;
+          if(sidebarUserEl) sidebarUserEl.textContent = user.name;
+          if(avatarEl) avatarEl.textContent = (user.name || 'U').slice(0,1).toUpperCase();
+          if(signInBtn) signInBtn.style.display = 'none';
+          if(signOutBtn) signOutBtn.style.display = 'block';
           if(authInd){ authInd.textContent = 'K'; authInd.title = 'Увійшли як користувач (натисни щоб вийти)'; }
         } else {
-          profileName.textContent = 'Гість';
-          avatarEl.textContent = 'G';
-          signInBtn.style.display = 'block';
-          signOutBtn.style.display = 'none';
+          if(profileName) profileName.textContent = 'Гість';
+          if(adminNameEl) adminNameEl.textContent = 'Гість';
+          if(sidebarUserEl) sidebarUserEl.textContent = 'Гість';
+          if(avatarEl) avatarEl.textContent = 'G';
+          if(signInBtn) signInBtn.style.display = 'block';
+          if(signOutBtn) signOutBtn.style.display = 'none';
           if(authInd){ authInd.textContent = 'G'; authInd.title = 'Ви як гість (натисни щоб увійти)'; }
         }
       }
@@ -308,6 +315,18 @@
         profileMenu.classList.remove('open');
       });
       renderUser();
+
+      // Панель керування — зробити посилання активним
+      const dashboardLink = document.getElementById('dashboard-link');
+      dashboardLink && dashboardLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        const user = JSON.parse(localStorage.getItem(USER_KEY));
+        if(!user){
+          confirmModal('Потрібно увійти, щоб відкрити панель керування. Увійти зараз?').then(ok => { if(ok) signInBtn.click(); });
+          return;
+        }
+        confirmModal('Відкрити панель керування?').then(ok => { if(ok) window.location.href = 'dashboard.html'; });
+      });
 
       // Toaster
       const toastContainer = document.getElementById('toast-container');
