@@ -57,6 +57,9 @@
     .excerpt{color:var(--muted);line-height:1.5;max-height:4.5em;overflow:hidden;position:relative}
     .excerpt::after{content:'';position:absolute;right:0;bottom:0;left:0;height:2.2em;background:linear-gradient(transparent, var(--card))}
     .entry-actions{display:flex;gap:0.4rem;margin-top:0.75rem}
+    .favorite-btn{background:transparent;border:0;font-size:1.15rem;cursor:pointer;color:#ffc107;padding:4px;border-radius:6px}
+    .favorite-btn.inactive{opacity:0.45}
+    .favorite-btn.active{color:#ffb020;transform:scale(1.05)}
 
     /* Sidebar */
     .sidebar{position:relative}
@@ -160,6 +163,10 @@
               <button class="btn ghost" id="export-btn-side">Експорт</button>
               <button class="btn ghost" id="import-btn-side">Імпорт</button>
               <button class="btn ghost" id="sync-btn-side">Синхронізувати</button>
+              <button class="btn ghost" id="favorites-toggle">Показати улюблені</button>
+            </div>
+            <div style="margin-top:0.5rem">
+              <label class="small">Сортування: <select id="sort-select"><option value="desc">Найновіші</option><option value="asc">Найстаріші</option></select></label>
             </div>
             <div class="small" id="sync-status" style="margin-top:0.5rem">Статус: готово</div>
           </div>
@@ -209,8 +216,6 @@
     <script>
       // ---- Загальні елементи ----
       const todayEl = document.getElementById('today');
-      const navToggle = document.querySelector('.nav-toggle');
-      const nav = document.getElementById('main-nav');
       const themeToggle = document.getElementById('theme-toggle');
       const bodyEl = document.documentElement;
       const profileBtn = document.getElementById('profile-btn');
@@ -223,14 +228,7 @@
       // ---- Дата ----
       todayEl.textContent = new Date().toLocaleDateString('uk-UA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-      // ---- Навігація ----
-      if(navToggle){
-        navToggle.addEventListener('click', () => {
-          const expanded = navToggle.getAttribute('aria-expanded') === 'true';
-          navToggle.setAttribute('aria-expanded', String(!expanded));
-          if(nav) nav.classList.toggle('open');
-        });
-      }
+
 
       // ---- Тема ----
       const THEME_KEY = 'diary.theme';
@@ -357,18 +355,32 @@
       }
 
       function renderEntries(filter=''){
-        const list = loadEntries().filter(e => (e.title + ' ' + e.content).toLowerCase().includes(filter.toLowerCase()));
+        let list = loadEntries().filter(e => (e.title + ' ' + e.content).toLowerCase().includes(filter.toLowerCase()));
+        // Apply favorites filter
+        if(showFavoritesOnly) list = list.filter(e => e.favorite);
+        // Sorting
+        if(sortOrder === 'desc') list.sort((a,b)=> new Date(b.updated||b.created) - new Date(a.updated||a.created));
+        else list.sort((a,b)=> new Date(a.updated||a.created) - new Date(b.updated||b.created));
+
         entriesGrid.innerHTML = '';
-        if(list.length === 0){ emptyState.style.display = 'block'; return; }
+        if(list.length === 0){
+          emptyState.style.display = 'block';
+          emptyState.innerHTML = showFavoritesOnly ? '<div style="padding:1.25rem;background:linear-gradient(90deg, rgba(33,117,155,0.04), rgba(33,117,155,0.02));border-radius:10px;display:inline-block"><div style="font-size:1.1rem;margin-bottom:0.5rem">Немає улюблених записів</div><div class="small">Спробуйте додати кілька записів у улюблені</div></div>' : 'У вас ще немає записів. Натисніть "Нова запис", щоб додати перший.';
+          return;
+        }
         emptyState.style.display = 'none';
-        list.sort((a,b)=> new Date(b.updated||b.created) - new Date(a.updated||a.created));
         for(const entry of list){
           const card = document.createElement('article');
           card.className = 'entry-card';
+          const favActive = entry.favorite ? 'active' : 'inactive';
+          const favSymbol = entry.favorite ? '★' : '☆';
           card.innerHTML = `
-            <h3>${escapeHtml(entry.title)}</h3>
+            <div style="display:flex;align-items:flex-start;gap:0.5rem">
+              <h3 style="flex:1">${escapeHtml(entry.title)}</h3>
+              <button class="favorite-btn ${favActive}" data-id="${entry.id}" data-action="favorite" aria-label="Улюблене" aria-pressed="${entry.favorite ? 'true' : 'false'}">${favSymbol}</button>
+            </div>
             <div class="entry-meta">${formatDate(entry.date || entry.created)}</div>
-            <div>${escapeHtml(entry.content).slice(0,250)}${entry.content.length>250? '...':''}</div>
+            <div class="excerpt">${escapeHtml(entry.content)}</div>
             <div class="entry-actions">
               <button class="btn ghost" data-id="${entry.id}" data-action="edit">Редагувати</button>
               <button class="btn ghost" data-id="${entry.id}" data-action="delete">Видалити</button>
@@ -382,36 +394,7 @@
         return String(str||'').replace(/[&<>"']/g, (s)=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[s]);
       }
 
-      function openModal(entry){
-        modal.hidden = false;
-        if(entry){
-          document.getElementById('modal-title').textContent = 'Редагувати запис';
-          entryId.value = entry.id;
-          entryTitle.value = entry.title;
-          entryContent.value = entry.content;
-          entryDate.value = entry.date ? (new Date(entry.date)).toISOString().slice(0,10) : '';
-          DRAFT_STATUS.textContent = '';
-          CLEAR_DRAFT_BTN.style.display = 'none';
-        } else {
-          document.getElementById('modal-title').textContent = 'Нова запис';
-          entryId.value = '';
-          const draft = loadDraft();
-          if(draft && (draft.title || draft.content)){
-            entryTitle.value = draft.title || '';
-            entryContent.value = draft.content || '';
-            entryDate.value = draft.date || '';
-            DRAFT_STATUS.textContent = 'Відновлена чернетка';
-            CLEAR_DRAFT_BTN.style.display = 'inline-flex';
-          } else {
-            entryTitle.value = '';
-            entryContent.value = '';
-            entryDate.value = '';
-            DRAFT_STATUS.textContent = '';
-            CLEAR_DRAFT_BTN.style.display = 'none';
-          }
-        }
-      }
-      function closeModal(){ modal.hidden = true; }
+
 
       // modal open/close with animation and body scroll lock
       const modalCloseBtn = document.getElementById('modal-close');
@@ -446,13 +429,19 @@
       }
       function closeModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
 
-      openNewBtn.addEventListener('click', ()=> openModal());
+
       const emptyNewBtn = document.getElementById('empty-new'); if(emptyNewBtn) emptyNewBtn.addEventListener('click', ()=> openModal());
       cancelBtn.addEventListener('click', ()=> closeModal());
       modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
       modalCloseBtn && modalCloseBtn.addEventListener('click', ()=> closeModal());
-      // ESC to close
-      document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') { if(modal.classList.contains('open')) closeModal(); } });
+      // ESC to close and keyboard shortcuts
+      document.addEventListener('keydown', (e)=>{ 
+        if(e.key === 'Escape') { if(modal.classList.contains('open')) closeModal(); }
+        // Ctrl/Cmd+N => new entry
+        if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n'){
+          e.preventDefault(); openModal(); showToast('Нова запис','info');
+        }
+      });
 
       entryForm.addEventListener('submit', (e)=>{
         e.preventDefault();
@@ -468,7 +457,7 @@
             showToast('Запис оновлено','success');
           }
         } else {
-          list.push({id: 'id-'+Math.random().toString(36).slice(2,9), title: entryTitle.value, content: entryContent.value, created: now, date: entryDate.value ? new Date(entryDate.value).toISOString() : now});
+          list.push({id: 'id-'+Math.random().toString(36).slice(2,9), title: entryTitle.value, content: entryContent.value, created: now, date: entryDate.value ? new Date(entryDate.value).toISOString() : now, favorite: false});
           showToast('Запис збережено','success');
         }
         saveEntries(list);
@@ -490,7 +479,16 @@
             const list = loadEntries().filter(x=>x.id!==id);
             saveEntries(list);
             renderEntries(searchInput.value);
-            showToast('Запис видалено');
+            showToast('Запис видалено','success');
+          }
+        } else if(action === 'favorite'){
+          const list = loadEntries();
+          const idx = list.findIndex(x=>x.id===id);
+          if(idx > -1){
+            list[idx].favorite = !list[idx].favorite;
+            saveEntries(list);
+            renderEntries(searchInput.value);
+            showToast(list[idx].favorite ? 'Додано до улюблених' : 'Прибрано з улюблених','success');
           }
         }
       });
@@ -560,7 +558,32 @@
       SYNC_BTN.addEventListener('click', doSync);
       const syncBtnSide = document.getElementById('sync-btn-side'); if(syncBtnSide) syncBtnSide.addEventListener('click', doSync);
 
-      CLEAR_DRAFT_BTN && CLEAR_DRAFT_BTN.addEventListener('click', ()=>{ if(confirm('Очистити чернетку?')) clearDraft(); });
+      // Favorites and sorting
+      let showFavoritesOnly = false;
+      const favoritesToggle = document.getElementById('favorites-toggle');
+      const sortSelect = document.getElementById('sort-select');
+      let sortOrder = sortSelect ? sortSelect.value : 'desc';
+      favoritesToggle && favoritesToggle.addEventListener('click', ()=>{
+        showFavoritesOnly = !showFavoritesOnly;
+        favoritesToggle.classList.toggle('active', showFavoritesOnly);
+        favoritesToggle.textContent = showFavoritesOnly ? 'Показати всі' : 'Показати улюблені';
+        showToast(showFavoritesOnly ? 'Показую тільки улюблені' : 'Показую всі записи');
+        renderEntries(searchInput.value);
+      });
+      sortSelect && sortSelect.addEventListener('change', ()=>{
+        sortOrder = sortSelect.value;
+        renderEntries(searchInput.value);
+      });
+
+      // Open profile settings from sidebar
+      const openProfileSettingsBtn = document.getElementById('open-profile-settings');
+      openProfileSettingsBtn && openProfileSettingsBtn.addEventListener('click', ()=>{
+        const user = JSON.parse(localStorage.getItem(USER_KEY));
+        if(!user) signInBtn.click();
+        else showToast('Налаштування профілю поки недоступні','info');
+      });
+
+      CLEAR_DRAFT_BTN && CLEAR_DRAFT_BTN.addEventListener('click', ()=>{ if(confirm('Очистити чернетку?')) { clearDraft(); showToast('Чернетка очищена'); } });
 
       // init
       renderEntries();
